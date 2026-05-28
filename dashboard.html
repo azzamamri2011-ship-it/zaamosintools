@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZaamTools — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-trail" id="cursorTrail"></div>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- Mobile hamburger -->
+  <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">Zaam<span>Tools</span></span>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Tools</div>
+
+      <a class="nav-item active" id="nav-nik" onclick="switchTool('nik'); return false;" href="#">
+        <i class="fas fa-id-card"></i>
+        NIK Parser
+        <span class="nav-badge">ID</span>
+      </a>
+
+      <a class="nav-item" id="nav-ip" onclick="switchTool('ip'); return false;" href="#">
+        <i class="fas fa-globe"></i>
+        IP Tracker
+      </a>
+
+      <div class="nav-section-label">Lainnya</div>
+
+      <a class="nav-item" href="index.html">
+        <i class="fas fa-house"></i>
+        Beranda
+      </a>
+
+      <a class="nav-item" id="nav-history" onclick="showHistory(); return false;" href="#">
+        <i class="fas fa-clock-rotate-left"></i>
+        Riwayat
+        <span class="nav-badge" id="history-count">0</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="index.html">
+        <i class="fas fa-arrow-left"></i>
+        Kembali ke Beranda
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 id="topbar-title">NIK Parser</h1>
+        <p id="topbar-sub">Ekstrak informasi lengkap dari NIK Indonesia</p>
+      </div>
+      <div class="topbar-right">
+        <div class="status-pill">
+          <div class="status-dot"></div>
+          API Online
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tool-tabs">
+      <button class="tool-tab active" id="tab-nik" onclick="switchTool('nik')">
+        <i class="fas fa-id-card"></i>
+        NIK Parser
+      </button>
+      <button class="tool-tab" id="tab-ip" onclick="switchTool('ip')">
+        <i class="fas fa-globe"></i>
+        IP Tracker
+      </button>
+    </div>
+
+    <!-- PANELS -->
+    <div class="panels-wrap">
+
+      <!-- NIK PANEL -->
+      <div class="panel active" id="panel-nik">
+        <div class="input-section">
+          <div class="input-label">
+            <i class="fas fa-fingerprint"></i>
+            Nomor Induk Kependudukan (NIK)
+          </div>
+          <div class="input-row">
+            <div class="input-wrap">
+              <input
+                type="text"
+                class="tool-input"
+                id="nik-input"
+                placeholder="Masukkan 16 digit NIK..."
+                maxlength="16"
+                oninput="this.value=this.value.replace(/\D/g,'')"
+                onkeydown="if(event.key==='Enter') searchNIK()"
+              />
+              <i class="fas fa-id-card input-icon"></i>
+            </div>
+            <button class="btn-search" id="nik-btn" onclick="searchNIK()">
+              <i class="fas fa-magnifying-glass btn-icon"></i>
+              <i class="fas fa-spinner spinner"></i>
+              Cari
+            </button>
+          </div>
+          <div class="input-hint">
+            Contoh: <code>1273040810110002</code> &nbsp;|&nbsp; Harus 16 digit angka
+          </div>
+        </div>
+
+        <div class="result-area" id="nik-result"></div>
+      </div>
+
+      <!-- IP PANEL -->
+      <div class="panel" id="panel-ip">
+        <div class="input-section">
+          <div class="input-label">
+            <i class="fas fa-network-wired"></i>
+            IP Address atau Domain
+          </div>
+          <div class="input-row">
+            <div class="input-wrap">
+              <input
+                type="text"
+                class="tool-input"
+                id="ip-input"
+                placeholder="Contoh: 8.8.8.8 atau google.com"
+                onkeydown="if(event.key==='Enter') searchIP()"
+              />
+              <i class="fas fa-globe input-icon"></i>
+            </div>
+            <button class="btn-search" id="ip-btn" onclick="searchIP()">
+              <i class="fas fa-magnifying-glass btn-icon"></i>
+              <i class="fas fa-spinner spinner"></i>
+              Lacak
+            </button>
+          </div>
+          <div class="input-hint">
+            Masukkan IPv4, IPv6, atau nama domain. Contoh: <code>103.112.244.90</code> &nbsp;|&nbsp; <code>google.com</code>
+          </div>
+        </div>
+
+        <div class="result-area" id="ip-result"></div>
+      </div>
+
+    </div>
+
+    <!-- HISTORY -->
+    <div class="history-section" id="history-section" style="display:none;">
+      <div class="history-header">
+        <div class="history-title">
+          <i class="fas fa-clock-rotate-left"></i>
+          Riwayat Pencarian
+        </div>
+        <button class="history-clear" onclick="clearHistory()">Hapus Semua</button>
+      </div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
